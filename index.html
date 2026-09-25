@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estancia La Taba — Catálogo</title>
+  <meta name="description" content="Catálogo de muebles y objetos de la Estancia La Taba, organizado por ambiente.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,620&family=Outfit:wght@340;420;520;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero" id="top">
+    <div class="triptych">
+      <img src="images/hero/izquierda.jpg" alt="Ala izquierda de la casa, con el jardín y los árboles" width="339" height="450">
+      <img src="images/hero/centro.jpg" alt="Frente de la casa, con la galería y el techo de tejas" width="340" height="450">
+      <img src="images/hero/derecha.jpg" alt="Ala derecha de la casa, con el árbol y el césped" width="340" height="450">
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow">Estancia</p>
+      <h1>La Taba</h1>
+      <p class="lede">Catálogo de muebles y objetos</p>
+      <a class="hero-link" href="#catalogo">Recorrer el catálogo</a>
+    </div>
+  </header>
+
+  <section class="intro">
+    <div class="intro-copy">
+      <p class="eyebrow ink">Inventario de la casa</p>
+      <h2>Ambiente por ambiente.</h2>
+      <p>Las piezas de la estancia, con foto, descripción y precio publicado. Actualizado el <time datetime="2026-09-24">24 de septiembre de 2026</time>.</p>
+    </div>
+    <dl class="stats" id="stats"></dl>
+  </section>
+
+  <div class="toolbar" id="catalogo">
+    <div class="toolbar-row">
+      <a class="brand" href="#top">La Taba</a>
+      <label class="search">
+        <span class="sr-only">Buscar una pieza</span>
+        <input id="search" type="search" placeholder="Buscar mesa, cama, cuadro…" autocomplete="off">
+      </label>
+      <p class="result-count" id="result-count" aria-live="polite"></p>
+    </div>
+    <div class="chips" id="chips" role="tablist" aria-label="Ambientes"></div>
+  </div>
+
+  <main id="list"></main>
+
+  <footer class="site-footer">
+    <p>Estancia La Taba</p>
+    <p>Precios publicados del inventario del 24 de septiembre de 2026.</p>
+  </footer>
+
+  <dialog id="ficha">
+    <div class="ficha-layout">
+      <div class="ficha-media" id="ficha-media"></div>
+      <div class="ficha-body">
+        <button class="close" id="close-ficha" type="button">Cerrar</button>
+        <p class="eyebrow ink" id="ficha-kicker"></p>
+        <h2 id="ficha-title"></h2>
+        <p class="ficha-price" id="ficha-price"></p>
+        <p class="ficha-desc" id="ficha-desc"></p>
+        <dl id="ficha-meta"></dl>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="catalog.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
