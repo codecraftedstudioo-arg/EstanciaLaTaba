@@ -59,18 +59,11 @@ a { color: inherit; }
   color: var(--cream);
 }
 
-.triptych {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  background: #1c1714;
-}
-
-.triptych img {
+.hero-photo {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 339 / 451;
+  max-height: 92svh;
   object-fit: cover;
   object-position: center center;
 }
