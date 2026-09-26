@@ -12,26 +12,7 @@
   <link rel="stylesheet" href="anfitrion.css">
 </head>
 <body>
-  <main id="login-view" class="login" hidden>
-    <form id="login-form" class="login-card">
-      <p class="eyebrow">Estancia La Taba</p>
-      <h1>Modo Anfitrión</h1>
-      <p id="login-help">Ingresá para administrar el inventario de la casa.</p>
-      <label>Usuario o email
-        <input id="login-user" name="user" type="text" autocomplete="username" required>
-      </label>
-      <label>Contraseña
-        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
-      </label>
-      <label id="confirm-label" hidden>Repetir contraseña
-        <input id="login-confirm" name="confirm" type="password" autocomplete="new-password">
-      </label>
-      <p id="login-error" class="error" hidden></p>
-      <button class="primary" id="login-submit" type="submit">Ingresar</button>
-    </form>
-  </main>
-
-  <div id="app-view" class="app" hidden>
+  <div id="app-view" class="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">La Taba<span>Modo Anfitrión</span></div>
       <nav class="nav" id="nav" aria-label="Secciones"></nav>
@@ -52,7 +33,6 @@
 
   <script src="../catalog.js"></script>
   <script src="../js/inventory-store.js"></script>
-  <script src="auth.js"></script>
   <script src="anfitrion.js"></script>
 </body>
 </html>

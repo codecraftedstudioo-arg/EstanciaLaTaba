@@ -1,5 +1,4 @@
 const store = window.InventoryStore;
-const auth = window.AnfitrionAuth;
 const money = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
@@ -28,8 +27,6 @@ const state = {
   sort: "id",
 };
 
-const loginView = document.querySelector("#login-view");
-const appView = document.querySelector("#app-view");
 const view = document.querySelector("#view");
 const editor = document.querySelector("#editor");
 
@@ -93,7 +90,7 @@ async function optimizePhoto(file) {
 function renderNav() {
   document.querySelector("#nav").innerHTML = NAV.map(
     ([id, label]) =>
-      `<button type="button" data-view="${id}" aria-current="${state.view === id ? "page" : "false"}">${label}</button>`
+      `<button type="button" data-view="${id}" ${state.view === id ? 'aria-current="page"' : ""}>${label}</button>`
   ).join("");
   document.querySelector("#view-title").textContent =
     state.view === "dashboard" ? "Modo Anfitrión" : NAV.find(([id]) => id === state.view)[1];
@@ -356,11 +353,10 @@ function renderHistory() {
 }
 
 function renderSettings() {
-  const record = auth.credentials();
   view.innerHTML = `
     <section class="panel">
       <h2>Este dispositivo</h2>
-      <p class="lede">Sesión de ${escapeHtml(auth.session().user)}. ${record ? `Acceso configurado para ${escapeHtml(record.user)}.` : ""} Los cambios del inventario se guardan en este navegador y el catálogo público de esta misma computadora los toma al recargar. No hay contraseñas en el repositorio.</p>
+      <p class="lede">El Modo Anfitrión abre directo, sin usuario ni contraseña. Los cambios del inventario se guardan en este navegador y el catálogo público de esta misma computadora los toma al recargar.</p>
       <div class="actions">
         <button class="small" id="export-data" type="button">Descargar copia</button>
         <label class="small">Importar copia<input id="import-data" type="file" accept="application/json"></label>
@@ -629,51 +625,7 @@ document.querySelector("#menu").addEventListener("click", () => {
   document.querySelector("#sidebar").classList.toggle("open");
 });
 document.querySelector("#logout").addEventListener("click", () => {
-  auth.logout();
-  location.reload();
+  location.href = "../";
 });
 
-function showApp() {
-  loginView.hidden = true;
-  appView.hidden = false;
-  render();
-}
-
-async function startLogin() {
-  await auth.loadOptionalConfig();
-  if (auth.session()) {
-    showApp();
-    return;
-  }
-  const existing = auth.credentials();
-  const setup = !existing;
-  document.querySelector("#confirm-label").hidden = !setup;
-  document.querySelector("#login-submit").textContent = "Ingresar";
-  document.querySelector("#login-help").textContent = setup
-    ? "Definí el acceso de este dispositivo. La contraseña se guarda solo como un código, nunca en texto."
-    : "Ingresá para administrar el inventario de la casa.";
-  loginView.hidden = false;
-  document.querySelector("#login-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const error = document.querySelector("#login-error");
-    const user = document.querySelector("#login-user").value;
-    const password = document.querySelector("#login-password").value;
-    const confirm = document.querySelector("#login-confirm").value;
-    try {
-      if (setup) {
-        if (!user.trim()) throw new Error("Escribí un usuario o email.");
-        if (password.length < 8) throw new Error("Usá una contraseña de al menos 8 caracteres.");
-        if (password !== confirm) throw new Error("Las contraseñas no coinciden.");
-        await auth.defineAccess(user, password);
-      } else {
-        await auth.login(user, password);
-      }
-      showApp();
-    } catch (failure) {
-      error.hidden = false;
-      error.textContent = failure.message;
-    }
-  });
-}
-
-startLogin();
+render();
