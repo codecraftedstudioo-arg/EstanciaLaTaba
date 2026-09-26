@@ -38,11 +38,20 @@ function matches(item) {
   return haystack.includes(query);
 }
 
+function sourceItems() {
+  return window.InventoryStore ? window.InventoryStore.publicItems() : catalog.items;
+}
+
+function sourceRooms() {
+  return window.InventoryStore ? window.InventoryStore.publicRooms() : catalog.rooms;
+}
+
 function renderStats() {
-  const rooms = new Set(catalog.items.map((item) => item.room));
-  const withPhoto = catalog.items.filter((item) => photosOf(item).length).length;
+  const items = sourceItems();
+  const rooms = new Set(items.map((item) => item.room));
+  const withPhoto = items.filter((item) => photosOf(item).length).length;
   const entries = [
-    ["Piezas", catalog.items.length],
+    ["Piezas", items.length],
     ["Ambientes", rooms.size],
     ["Con foto", withPhoto],
   ];
@@ -52,7 +61,7 @@ function renderStats() {
 }
 
 function renderChips() {
-  const options = [{ name: "Todos", slug: "todos" }, ...catalog.rooms];
+  const options = [{ name: "Todos", slug: "todos" }, ...sourceRooms()];
   chips.innerHTML = options
     .map(
       (room) =>
@@ -92,7 +101,7 @@ function card(item) {
 }
 
 function renderList() {
-  const visible = catalog.items.filter(matches);
+  const visible = sourceItems().filter(matches);
   resultCount.textContent =
     visible.length === 1 ? "1 pieza" : `${visible.length} piezas`;
 
@@ -130,7 +139,7 @@ function metaRow(label, value) {
 }
 
 function openFicha(id) {
-  const item = catalog.items.find((entry) => entry.id === id);
+  const item = sourceItems().find((entry) => entry.id === id);
   if (!item) return;
   const media = document.querySelector("#ficha-media");
   const photos = photosOf(item);

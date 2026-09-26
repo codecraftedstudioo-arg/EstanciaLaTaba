@@ -1374,7 +1374,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": null,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-099.jpg"
     },
     {
       "id": "EST-100",
@@ -1388,7 +1388,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": null,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-100.jpg"
     },
     {
       "id": "EST-101",
@@ -1402,7 +1402,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": null,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-101.jpg"
     },
     {
       "id": "EST-102",
@@ -1430,7 +1430,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": null,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-103.jpg"
     },
     {
       "id": "EST-104",
@@ -1444,7 +1444,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": null,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-104.jpg"
     },
     {
       "id": "EST-105",
@@ -1487,6 +1487,20 @@ window.CATALOG = {
       "price": 400000,
       "status": "Disponible",
       "image": "images/items/EST-109.jpg"
+    },
+    {
+      "id": "EST-144",
+      "room": "Galería",
+      "roomSlug": "galeria",
+      "category": "Muebles",
+      "name": "Silloncitos de plastico",
+      "description": "Sillon de jardin de plastico",
+      "quantity": 4,
+      "measures": null,
+      "condition": null,
+      "price": 350000,
+      "status": "Disponible",
+      "image": "images/items/EST-144.jpg"
     },
     {
       "id": "EST-112",
@@ -1626,7 +1640,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": 150000,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-121.jpg"
     },
     {
       "id": "EST-122",
@@ -1640,7 +1654,7 @@ window.CATALOG = {
       "condition": "Buen estado",
       "price": 15000,
       "status": "Disponible",
-      "image": null
+      "image": "images/items/EST-122.jpg"
     },
     {
       "id": "EST-123",
@@ -1823,6 +1837,20 @@ window.CATALOG = {
       "price": 50000,
       "status": "Disponible",
       "image": "images/items/EST-135.jpg"
+    },
+    {
+      "id": "EST-143",
+      "room": "Cocina",
+      "roomSlug": "cocina",
+      "category": "Iluminación",
+      "name": "Lamparas establo",
+      "description": "Lampara establo rojas",
+      "quantity": 1,
+      "measures": null,
+      "condition": null,
+      "price": 30000,
+      "status": "Disponible",
+      "image": "images/items/EST-143.jpg"
     },
     {
       "id": "EST-136",

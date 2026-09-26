@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modo Anfitrión — Estancia La Taba</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,620&family=Outfit:wght@340;420;520;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="anfitrion.css">
+</head>
+<body>
+  <main id="login-view" class="login" hidden>
+    <form id="login-form" class="login-card">
+      <p class="eyebrow">Estancia La Taba</p>
+      <h1>Modo Anfitrión</h1>
+      <p id="login-help">Ingresá para administrar el inventario de la casa.</p>
+      <label>Usuario o email
+        <input id="login-user" name="user" type="text" autocomplete="username" required>
+      </label>
+      <label>Contraseña
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <label id="confirm-label" hidden>Repetir contraseña
+        <input id="login-confirm" name="confirm" type="password" autocomplete="new-password">
+      </label>
+      <p id="login-error" class="error" hidden></p>
+      <button class="primary" id="login-submit" type="submit">Ingresar</button>
+    </form>
+  </main>
+
+  <div id="app-view" class="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">La Taba<span>Modo Anfitrión</span></div>
+      <nav class="nav" id="nav" aria-label="Secciones"></nav>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <button class="small menu" id="menu" type="button">Menú</button>
+        <h1 id="view-title">Modo Anfitrión</h1>
+        <button class="small" id="logout" type="button">Salir</button>
+      </header>
+      <div class="view" id="view"></div>
+    </div>
+  </div>
+
+  <dialog id="editor">
+    <form class="dialog-body" id="editor-form"></form>
+  </dialog>
+
+  <script src="../catalog.js"></script>
+  <script src="../js/inventory-store.js"></script>
+  <script src="auth.js"></script>
+  <script src="anfitrion.js"></script>
+</body>
+</html>
