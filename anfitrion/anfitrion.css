@@ -50,7 +50,7 @@ img { max-width: 100%; }
   padding: 1.5rem;
   background:
     linear-gradient(to top, rgba(18, 13, 11, 0.82), rgba(18, 13, 11, 0.45)),
-    url("../images/hero/fachada.jpg") center/cover no-repeat;
+    url("/images/hero/fachada.jpg") center/cover no-repeat;
   color: var(--cream);
 }
 

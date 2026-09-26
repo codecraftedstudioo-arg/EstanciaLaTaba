@@ -57,7 +57,7 @@ function run(action) {
 
 function asset(src) {
   if (!src || /^(data:|https?:|\/)/.test(src)) return src;
-  return `../${src}`;
+  return `/${src}`;
 }
 
 function photoCell(item) {
@@ -625,7 +625,7 @@ document.querySelector("#menu").addEventListener("click", () => {
   document.querySelector("#sidebar").classList.toggle("open");
 });
 document.querySelector("#logout").addEventListener("click", () => {
-  location.href = "../";
+  location.href = "/";
 });
 
 render();
