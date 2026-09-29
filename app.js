@@ -77,6 +77,17 @@ function photosOf(item) {
   return item.image ? [item.image] : [];
 }
 
+function whatsappHref(name) {
+  const text = [
+    "Hola! Estoy interesado/a en el siguiente objeto de Estancia La Taba:",
+    "",
+    name,
+    "",
+    "Quisiera consultar si todavía está disponible.",
+  ].join("\n");
+  return `https://wa.me/5491167472760?text=${encodeURIComponent(text)}`;
+}
+
 function card(item) {
   const photos = photosOf(item);
   const count = photos.length > 1 ? `<span class="photo-count">${photos.length} fotos</span>` : "";
@@ -86,18 +97,24 @@ function card(item) {
   const qty = item.quantity > 1 ? `<span class="qty">× ${item.quantity}</span>` : "";
   const description = item.description ? escapeHtml(item.description) : "";
   return `
-    <button class="card" type="button" data-id="${item.id}">
-      <div class="media">${media}</div>
-      <div class="card-body">
-        <p class="card-room">${escapeHtml(item.room)}</p>
-        <h3>${escapeHtml(item.name)}</h3>
-        <p class="card-desc">${description}</p>
-        <div class="card-foot">
-          <span class="price">${formatPrice(item.price)}</span>
-          ${qty}
+    <article class="card">
+      <button class="card-open" type="button" data-id="${item.id}">
+        <div class="media">${media}</div>
+        <div class="card-body">
+          <p class="card-room">${escapeHtml(item.room)}</p>
+          <h3>${escapeHtml(item.name)}</h3>
+          <p class="card-desc">${description}</p>
+          <div class="card-foot">
+            <span class="price">${formatPrice(item.price)}</span>
+            ${qty}
+          </div>
         </div>
-      </div>
-    </button>`;
+      </button>
+      <a class="consult" href="${whatsappHref(item.name)}" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.15 6.4 2.15 11.83c0 1.74.46 3.44 1.34 4.94L2 22l5.39-1.41a10 10 0 0 0 4.65 1.18h.01c5.46 0 9.89-4.4 9.89-9.83C21.94 6.4 17.5 2 12.04 2zm5.76 13.86c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11-.42-.14-.95-.31-1.64-.6-2.88-1.24-4.76-4.14-4.9-4.33-.14-.19-1.16-1.54-1.16-2.94s.73-2.08 1-2.37c.24-.28.64-.41 1.02-.41.12 0 .23 0 .33.01.3.01.45.03.65.5.24.58.82 2 .89 2.15.07.14.12.32.02.51-.09.19-.14.31-.28.48-.14.16-.29.36-.41.48-.14.13-.28.28-.12.54.16.26.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.17 1.34.26.13.42.11.58-.07.16-.19.66-.77.84-1.03.18-.26.35-.22.58-.13.24.09 1.5.71 1.76.84.26.13.43.19.49.3.07.11.07.64-.17 1.32z"/></svg>
+        Consultar
+      </a>
+    </article>`;
 }
 
 function renderList() {
@@ -192,7 +209,8 @@ search.addEventListener("input", () => {
 });
 
 list.addEventListener("click", (event) => {
-  const button = event.target.closest(".card");
+  if (event.target.closest(".consult")) return;
+  const button = event.target.closest(".card-open");
   if (button) openFicha(button.dataset.id);
 });
 
