@@ -256,6 +256,11 @@ async function main() {
   assert(retired.estado === "Retirado" && retired.publicado === false, "Retirar no borra la fila.");
   assert(db.tables.objetos.some((item) => item.id === created.id), "El objeto sigue existiendo.");
   assert(!host.store.publicItems().some((item) => item.id === created.id), "El objeto retirado sale del catálogo.");
+  await host.store.republishItem(created.id);
+  const republished = db.tables.objetos.find((item) => item.id === created.id);
+  assert(republished.estado === "Disponible" && republished.publicado === true, "Volver a publicar lo deja Disponible y publicado.");
+  assert(host.store.publicItems().some((item) => item.id === created.id), "El objeto republicado vuelve al catálogo.");
+  await host.store.retireItem(created.id);
   const stats = host.store.metrics();
   assert(stats.removed >= 1 && stats.loaded === db.tables.objetos.length, "El resumen cuenta retirados y registros.");
 

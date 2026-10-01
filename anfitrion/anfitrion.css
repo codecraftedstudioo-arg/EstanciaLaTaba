@@ -170,6 +170,20 @@ textarea { min-height: 5.5rem; resize: vertical; }
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: end; }
 .toolbar label { margin: 0; min-width: 9rem; flex: 1; }
+.toolbar .primary {
+  flex: 0 0 auto;
+  background: var(--ink);
+  color: var(--cream);
+  white-space: nowrap;
+}
+.inventory-toolbar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: end;
+}
+.inventory-toolbar label { min-width: 0; }
+.inventory-toolbar .search-field { grid-column: 1 / 5; }
+.inventory-toolbar .primary { grid-column: 5; grid-row: 1; width: 100%; }
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: white; }
 table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
@@ -229,6 +243,12 @@ dialog::backdrop { background: rgba(28, 23, 20, 0.55); }
   .table-wrap td { border: 0; display: flex; justify-content: space-between; gap: 1rem; padding: 0.28rem 0.8rem; }
   .table-wrap td::before { content: attr(data-label); color: var(--ink-soft); }
   .primary, .danger, .ghost { min-height: 2.7rem; }
+}
+
+@media (max-width: 640px) {
+  .inventory-toolbar { grid-template-columns: 1fr 1fr; }
+  .inventory-toolbar .search-field,
+  .inventory-toolbar .primary { grid-column: 1 / -1; grid-row: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

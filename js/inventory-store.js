@@ -8,6 +8,7 @@
 
   const BROWSER_KEY = "la-taba-anfitrion-v1";
   const HIDDEN_KEY = "la-taba-ocultos";
+  const RESTORED_KEY = "la-taba-republicados";
   const LIBRARY = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js";
 
   let memory = Model.seed(window.CATALOG);
@@ -93,7 +94,18 @@
     } catch (error) {}
     const backup = readBrowserBackup();
     ((backup && backup.deletedIds) || []).forEach((id) => ids.add(String(id)));
+    readIdList(RESTORED_KEY).forEach((id) => ids.delete(id));
     return ids;
+  }
+
+  function readIdList(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch (error) {
+      return [];
+    }
   }
 
   function rememberHidden(id) {
@@ -103,6 +115,22 @@
     const fromBackup = new Set(((backup && backup.deletedIds) || []).map(String));
     const stored = [...ids].filter((entry) => !fromBackup.has(entry));
     localStorage.setItem(HIDDEN_KEY, JSON.stringify(stored));
+    try {
+      const restored = readIdList(RESTORED_KEY);
+      if (!restored.includes(String(id))) return;
+      localStorage.setItem(RESTORED_KEY, JSON.stringify(restored.filter((entry) => entry !== String(id))));
+    } catch (error) {}
+  }
+
+  function forgetHidden(id) {
+    const key = String(id);
+    try {
+      const hidden = readIdList(HIDDEN_KEY).filter((entry) => entry !== key);
+      localStorage.setItem(HIDDEN_KEY, JSON.stringify(hidden));
+      const restored = readIdList(RESTORED_KEY);
+      if (!restored.includes(key)) restored.push(key);
+      localStorage.setItem(RESTORED_KEY, JSON.stringify(restored));
+    } catch (error) {}
   }
 
   function overlayHidden() {
@@ -476,6 +504,21 @@
     return item;
   }
 
+  async function republishItem(id) {
+    const item = memory.items.find((entry) => entry.id === id);
+    if (!item) return null;
+    if (item.status === "Vendido") {
+      throw new Error("Un objeto vendido no vuelve al catálogo. Queda en Ventas.");
+    }
+    forgetHidden(id);
+    if (client && mode === "supabase") return updateItem(id, { status: "Disponible", published: true });
+    item.status = "Disponible";
+    item.published = true;
+    await logChange(item, "Objeto publicado", "Retirado", "Disponible");
+    notify();
+    return item;
+  }
+
   async function duplicateItem(id) {
     const item = memory.items.find((entry) => entry.id === id);
     if (!item) throw new Error("No se encontró el objeto.");
@@ -784,6 +827,7 @@
     createItem,
     updateItem,
     retireItem,
+    republishItem,
     deleteItem: retireItem,
     duplicateItem,
     createRoom,

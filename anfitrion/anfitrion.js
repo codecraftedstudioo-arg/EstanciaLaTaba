@@ -169,7 +169,10 @@ function filteredItems() {
 
 function selectOptions(values, current, placeholder) {
   return [`<option value="">${placeholder}</option>`]
-    .concat(values.map((value) => `<option ${value === current ? "selected" : ""}>${escapeHtml(value)}</option>`))
+    .concat(values.map((value) => {
+      const safe = escapeHtml(value);
+      return `<option value="${safe}" ${value === current ? "selected" : ""}>${safe}</option>`;
+    }))
     .join("");
 }
 
@@ -177,8 +180,8 @@ function renderInventory() {
   const data = store.data();
   const items = filteredItems();
   view.innerHTML = `
-    <div class="toolbar">
-      <label class="wide">Buscar
+    <div class="toolbar inventory-toolbar">
+      <label class="search-field">Buscar
         <input id="query" type="search" value="${escapeHtml(state.query)}" placeholder="ID, artículo, descripción, ambiente o categoría">
       </label>
       <label>Ambiente
@@ -228,7 +231,9 @@ function renderInventory() {
             <button class="small" data-action="editar" data-id="${item.id}" type="button">Editar</button>
             <button class="small" data-action="duplicar" data-id="${item.id}" type="button">Duplicar</button>
             <button class="small" data-action="estado" data-id="${item.id}" type="button">Cambiar estado</button>
-            <button class="small danger" data-action="eliminar" data-id="${item.id}" type="button">Retirar</button>
+            ${item.status === "Retirado"
+              ? `<button class="small" data-action="republicar" data-id="${item.id}" type="button">Volver a publicar</button>`
+              : `<button class="small danger" data-action="eliminar" data-id="${item.id}" type="button">Retirar</button>`}
           </div></td>
         </tr>`).join("")}
       </tbody>
@@ -560,7 +565,7 @@ function openEditor(item, readOnly) {
 
 function bindInventory(event) {
   const target = event.target;
-  if (target.id === "query") {
+  if (target.id === "query" && event.type === "input") {
     state.query = target.value;
     const caret = target.selectionStart;
     renderInventory();
@@ -571,14 +576,19 @@ function bindInventory(event) {
     }
     return;
   }
-  if (target.id === "filter-room") state.room = target.value;
-  if (target.id === "filter-category") state.category = target.value;
-  if (target.id === "filter-status") state.status = target.value;
-  if (target.id === "filter-published") state.published = target.value;
-  if (target.id === "sort") state.sort = target.value;
-  if (["filter-room", "filter-category", "filter-status", "filter-published", "sort"].includes(target.id)) {
+  const filters = {
+    "filter-room": "room",
+    "filter-category": "category",
+    "filter-status": "status",
+    "filter-published": "published",
+    sort: "sort",
+  };
+  if (event.type === "change" && Object.prototype.hasOwnProperty.call(filters, target.id)) {
+    state[filters[target.id]] = target.value;
     renderInventory();
+    return;
   }
+  if (event.type !== "click") return;
   if (target.id === "new-item") openEditor(null, false);
   const button = target.closest("[data-action]");
   if (!button) return;
@@ -592,6 +602,9 @@ function bindInventory(event) {
       return;
     }
     if (window.confirm("¿Querés retirar este objeto del catálogo?")) run(() => store.retireItem(item.id));
+  }
+  if (button.dataset.action === "republicar") {
+    if (window.confirm("¿Querés volver a publicar este objeto en el catálogo?")) run(() => store.republishItem(item.id));
   }
   if (button.dataset.action === "estado") {
     const status = window.prompt(`Estado de ${item.name} (${store.SALE_STATUSES.join(", ")})`, item.status);
