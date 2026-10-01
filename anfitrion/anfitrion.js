@@ -46,13 +46,46 @@ function showError(error) {
   window.alert(error.message || "No se pudo completar la acción.");
 }
 
-function run(action) {
+async function run(action) {
   try {
-    action();
+    await action();
     render();
   } catch (error) {
     showError(error);
   }
+}
+
+function downloadBackup(payload, filename) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function connectionNote() {
+  if (store.mode() === "supabase") {
+    return `<p class="notice">Conectado a Supabase. Lo que cambies acá se ve en el catálogo de cualquier visitante.</p>`;
+  }
+  const detail = store.lastError() ? ` ${escapeHtml(store.lastError().message)}` : "";
+  return `<p class="error">Supabase no está conectado.${detail} Retirar un objeto lo oculta en la página principal de este navegador. Agregá SUPABASE_URL y SUPABASE_ANON_KEY para ocultarlo en todos los dispositivos.</p>`;
+}
+
+function metricCards(stats) {
+  return [
+    ["Registros cargados", stats.loaded],
+    ["Unidades totales", stats.units],
+    ["Disponibles", stats.available],
+    ["Reservados", stats.reserved],
+    ["Vendidos", stats.sold],
+    ["Retirados", stats.removed],
+    ["No vender", stats.notForSale],
+    ["Publicados", stats.published],
+    ["Valor total publicado", price(stats.publishedValue)],
+    ["Valor disponible", price(stats.availableValue)],
+    ["Valor vendido", price(stats.soldValue)],
+  ].map(([label, value]) => metric(label, value)).join("");
 }
 
 function asset(src) {
@@ -104,19 +137,9 @@ function renderDashboard() {
   const stats = store.metrics();
   view.innerHTML = `
     <p class="eyebrow">Administración — Estancia La Taba</p>
+    ${connectionNote()}
     <h2 class="lede" style="font-family:var(--serif);font-size:2rem;color:var(--ink);margin:0">Modo Anfitrión</h2>
-    <section class="cards">
-      ${metric("Objetos cargados", stats.loaded)}
-      ${metric("Unidades totales", stats.units)}
-      ${metric("Objetos publicados", stats.published)}
-      ${metric("Objetos disponibles", stats.available)}
-      ${metric("Objetos reservados", stats.reserved)}
-      ${metric("Objetos vendidos", stats.sold)}
-      ${metric("Objetos retirados", stats.removed)}
-      ${metric("Valor total publicado", price(stats.publishedValue))}
-      ${metric("Valor disponible", price(stats.availableValue))}
-      ${metric("Valor vendido", price(stats.soldValue))}
-    </section>
+    <section class="cards">${metricCards(stats)}</section>
     <p class="lede">El precio publicado es el valor del lote. No se multiplica por la cantidad.</p>`;
 }
 
@@ -205,7 +228,7 @@ function renderInventory() {
             <button class="small" data-action="editar" data-id="${item.id}" type="button">Editar</button>
             <button class="small" data-action="duplicar" data-id="${item.id}" type="button">Duplicar</button>
             <button class="small" data-action="estado" data-id="${item.id}" type="button">Cambiar estado</button>
-            <button class="small danger" data-action="eliminar" data-id="${item.id}" type="button">Eliminar</button>
+            <button class="small danger" data-action="eliminar" data-id="${item.id}" type="button">Retirar</button>
           </div></td>
         </tr>`).join("")}
       </tbody>
@@ -259,13 +282,10 @@ function renderSummary() {
   const byName = store.summaryByName();
   const byRoom = store.summaryByRoom();
   view.innerHTML = `
+    ${connectionNote()}
     <section class="cards">
-      ${metric("Total de registros", stats.loaded)}
-      ${metric("Total de unidades", stats.units)}
-      ${metric("Valor total publicado", price(stats.publishedValue))}
-      ${metric("Valor disponible", price(stats.availableValue))}
+      ${metricCards(stats)}
       ${metric("Valor reservado", price(stats.reservedValue))}
-      ${metric("Valor vendido", price(stats.soldValue))}
     </section>
     <section class="panel">
       <h2>Objeto y cantidad</h2>
@@ -353,13 +373,25 @@ function renderHistory() {
 }
 
 function renderSettings() {
+  const connected = store.mode() === "supabase";
+  const browserCopy = store.hasBrowserBackup();
   view.innerHTML = `
     <section class="panel">
-      <h2>Este dispositivo</h2>
-      <p class="lede">El Modo Anfitrión abre directo, sin usuario ni contraseña. Los cambios del inventario se guardan en este navegador y el catálogo público de esta misma computadora los toma al recargar.</p>
+      <h2>Base central</h2>
+      ${connectionNote()}
+      <p class="lede">Cada alta, edición, cambio de estado y publicación se guarda en Supabase. Retirar un objeto lo deja en el inventario con estado Retirado y lo oculta del catálogo público.</p>
+      <p class="lede">Hay ${store.catalogSize()} objetos en la copia del sitio. La migración inserta solo los ID que todavía no están en Supabase.</p>
       <div class="actions">
+        <button class="small" id="migrate-missing" type="button" ${connected ? "" : "disabled"}>Migrar objetos que faltan</button>
         <button class="small" id="export-data" type="button">Descargar copia</button>
-        <label class="small">Importar copia<input id="import-data" type="file" accept="application/json"></label>
+        <label class="small">Importar copia<input id="import-data" type="file" accept="application/json" ${connected ? "" : "disabled"}></label>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Este navegador</h2>
+      <p class="lede">${browserCopy ? "Hay una copia anterior guardada solo en este navegador. Subirla evita perder esos cambios." : "No hay una copia local anterior en este navegador."}</p>
+      <div class="actions">
+        <button class="small" id="push-browser" type="button" ${connected && browserCopy ? "" : "disabled"}>Subir copia de este navegador</button>
       </div>
     </section>`;
 }
@@ -481,11 +513,12 @@ function openEditor(item, readOnly) {
     document.querySelector("#editor-form button.primary").hidden = true;
   }
   document.querySelector("#close-editor").addEventListener("click", () => editor.close());
-  document.querySelector("#editor-form").onsubmit = (event) => {
+  document.querySelector("#editor-form").onsubmit = async (event) => {
     event.preventDefault();
     if (readOnly) return;
     const form = new FormData(event.currentTarget);
     const error = document.querySelector("#editor-error");
+    const button = event.currentTarget.querySelector("button.primary");
     try {
       const category = form.get("category") === "__nueva" ? String(form.get("newCategory") || "") : String(form.get("category") || "");
       const payload = {
@@ -511,11 +544,13 @@ function openEditor(item, readOnly) {
       if (!payload.category) throw new Error("Elegí o escribí una categoría.");
       if (!Number.isInteger(payload.quantity) || payload.quantity < 1) throw new Error("La cantidad debe ser un entero mayor a cero.");
       if (payload.price != null && (Number.isNaN(payload.price) || payload.price < 0)) throw new Error("El precio publicado no es válido.");
-      if (item) store.updateItem(item.id, payload);
-      else store.createItem(payload);
+      if (button) button.disabled = true;
+      if (item) await store.updateItem(item.id, payload);
+      else await store.createItem(payload);
       editor.close();
       render();
     } catch (failure) {
+      if (button) button.disabled = false;
       error.hidden = false;
       error.textContent = failure.message;
     }
@@ -552,7 +587,11 @@ function bindInventory(event) {
   if (button.dataset.action === "editar") openEditor(item, false);
   if (button.dataset.action === "duplicar") run(() => store.duplicateItem(item.id));
   if (button.dataset.action === "eliminar") {
-    if (window.confirm(`¿Eliminar ${item.name}?`)) run(() => store.deleteItem(item.id));
+    if (item.status === "Vendido") {
+      showError(new Error("Un objeto vendido no se retira. Queda en Ventas para conservar el historial."));
+      return;
+    }
+    if (window.confirm("¿Querés retirar este objeto del catálogo?")) run(() => store.retireItem(item.id));
   }
   if (button.dataset.action === "estado") {
     const status = window.prompt(`Estado de ${item.name} (${store.SALE_STATUSES.join(", ")})`, item.status);
@@ -581,12 +620,25 @@ function bindView(event) {
   }
   if (deleteCategory && window.confirm("¿Eliminar esta categoría?")) run(() => store.deleteCategory(deleteCategory.dataset.categoryDelete));
   if (event.target.id === "export-data") {
-    const blob = new Blob([store.exportData()], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "inventario-la-taba.json";
-    link.click();
-    URL.revokeObjectURL(link.href);
+    downloadBackup(JSON.parse(store.exportData()), "inventario-la-taba.json");
+  }
+  if (event.target.closest("#migrate-missing")) {
+    const preview = store.migrationPreview();
+    downloadBackup(preview, "backup-antes-de-migrar.json");
+    if (!window.confirm(`Se revisaron ${preview.items.length} objetos. Se van a insertar solo los que no existan en Supabase. ¿Continuar?`)) return;
+    run(async () => {
+      const result = await store.migrateMissing();
+      window.alert(`Revisados: ${result.reviewed}. Ya estaban: ${result.already}. Insertados: ${result.inserted}.`);
+    });
+  }
+  if (event.target.closest("#push-browser")) {
+    const preview = store.migrationPreview();
+    downloadBackup(preview, "backup-navegador.json");
+    if (!window.confirm("Esto actualiza Supabase con los objetos guardados en este navegador. No borra objetos que existan solo en Supabase. ¿Continuar?")) return;
+    run(async () => {
+      const result = await store.pushBrowserCopy();
+      window.alert(`Se actualizaron ${result.updated} objetos en Supabase.`);
+    });
   }
 }
 
@@ -594,9 +646,9 @@ view.addEventListener("input", bindView);
 view.addEventListener("change", (event) => {
   if (event.target.id === "import-data" && event.target.files[0]) {
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        store.importData(String(reader.result));
+        await store.importData(String(reader.result));
         render();
       } catch (error) {
         showError(error);
@@ -614,6 +666,10 @@ view.addEventListener("submit", (event) => {
   if (event.target.id === "category-form") run(() => store.createCategory(String(form.get("name") || "")));
 });
 
+window.addEventListener("la-taba-inventory", () => {
+  if (!editor.open) render();
+});
+
 document.querySelector("#nav").addEventListener("click", (event) => {
   const button = event.target.closest("[data-view]");
   if (!button) return;
@@ -628,4 +684,8 @@ document.querySelector("#logout").addEventListener("click", () => {
   location.href = "/";
 });
 
-render();
+view.innerHTML = `<p class="lede">Cargando inventario…</p>`;
+store.whenReady().then(render).catch((error) => {
+  showError(error);
+  render();
+});

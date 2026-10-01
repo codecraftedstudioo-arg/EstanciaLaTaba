@@ -1,0 +1,9 @@
+{
+  "name": "inventario-la-taba",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "check": "node scripts/check-inventory.js",
+    "migrate": "node scripts/migrate-inventory.js"
+  }
+}

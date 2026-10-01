@@ -176,6 +176,7 @@ function openFicha(id) {
   document.querySelector("#ficha-kicker").textContent = [item.room, item.category]
     .filter(Boolean)
     .join(" · ");
+  dialog.dataset.id = item.id;
   document.querySelector("#ficha-title").textContent = item.name;
   document.querySelector("#ficha-price").textContent = formatPrice(item.price);
   const notes = [];
@@ -229,6 +230,22 @@ dialog.addEventListener("click", (event) => {
   if (event.target === dialog) dialog.close();
 });
 
-renderStats();
-renderChips();
-renderList();
+function renderAll() {
+  if (state.room !== "todos" && !sourceRooms().some((room) => room.slug === state.room)) {
+    state.room = "todos";
+  }
+  renderStats();
+  renderChips();
+  renderList();
+  if (dialog.open && dialog.dataset.id && !sourceItems().some((item) => item.id === dialog.dataset.id)) {
+    dialog.close();
+  }
+}
+
+window.addEventListener("la-taba-inventory", renderAll);
+
+list.innerHTML = `<p class="empty">Cargando catálogo…</p>`;
+window.InventoryStore.whenReady().then(renderAll).catch((error) => {
+  console.error(error);
+  renderAll();
+});
